@@ -8,6 +8,11 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 spaces :: Parser ()
 spaces = skipMany1 space
 
+escapedChars :: Parser Char
+escapedChars = do char '\\'
+                  x <- oneOf "\\\""
+                  return x
+
 data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
@@ -17,7 +22,7 @@ data LispVal = Atom String
 
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many (noneOf "\"")
+                 x <- many $ escapedChars <|> noneOf "\"\\"
                  char '"'
                  return $ String x
 
